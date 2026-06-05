@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f1a;
+      --border: rgba(255,255,255,0.08);
+      --green: #22d3a5;
+      --amber: #fbbf24;
+      --red: #f87171;
+      --text: #e8eaf0;
+      --muted: #7b7f94;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .page-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #6C63FF, #FF6584);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      color: #a89cff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .table-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #151827;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1100px;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    thead th {
+      background: rgba(255,255,255,0.05);
+      padding: 14px 16px;
+      text-align: left;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: .05em;
+      color: var(--muted);
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+
+    td {
+      padding: 14px 16px;
+      vertical-align: middle;
+      white-space: nowrap;
+      color: var(--text);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .badge-high { background: rgba(34,211,165,.15); color: var(--green); }
+    .badge-medium { background: rgba(251,191,36,.15); color: var(--amber); }
+    .badge-low { background: rgba(248,113,113,.15); color: var(--red); }
+
+    .placed-yes { color: var(--green); font-weight: 600; }
+    .placed-no { color: var(--muted); }
+
+    .empty-msg {
+      max-width: 900px;
+      margin: 40px auto 0;
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #151827;
+    }
+
+    #celebration-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      display: none;
+    }
+
+    .emoji-float {
+      position: fixed;
+      font-size: 1.8rem;
+      pointer-events: none;
+      z-index: 10000;
+      animation: floatUp 2.2s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+      0%   { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(-200px) scale(1.2) rotate(20deg); }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="celebration-canvas"></canvas>
+
+<div class="top-bar">
+  <span class="page-title">{{ title }}</span>
+  <a href="/" class="back-btn">← Back to Search</a>
+</div>
+
+{% if students %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Student ID</th>
+        <th>Name</th>
+        <th>Department</th>
+        <th>CGPA</th>
+        <th>Internships</th>
+        <th>Projects</th>
+        <th>Skills</th>
+        <th>Score</th>
+        <th>Prediction</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in students %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ s.student_id }}</td>
+        <td>{{ s.name }}</td>
+        <td>{{ s.department }}</td>
+        <td>{{ s.cgpa }}</td>
+        <td>{{ s.internships }}</td>
+        <td>{{ s.projects }}</td>
+        <td>{{ s.skills_count }}</td>
+        <td>{{ s.prediction.score }}</td>
+        <td>
+          <span class="badge badge-{{ s.prediction.chance }}">{{ s.prediction.label }}</span>
+        </td>
+        <td>
+          {% if s.placed %}
+            <span class="placed-yes">✅ Placed</span>
+          {% else %}
+            <span class="placed-no">Pending</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-msg">No students found for this filter.</div>
+{% endif %}
+
+<script id="students-data" type="application/json">
+{{ students | default([], true) | tojson | safe }}
+</script>
+
+<script>
+  const students = JSON.parse(document.getElementById('students-data').textContent || '[]');
+  const placedCount = students.filter(function(s) {
+    return s.placed === true;
+  }).length;
+  const notPlacedCount = students.length - placedCount;
+
+  window.addEventListener('DOMContentLoaded', function() {
+    if (placedCount > 0) {
+      setTimeout(launchFireworks, 400);
+    }
+    if (notPlacedCount > 0) {
+      setTimeout(launchEncouragement, placedCount > 0 ? 1800 : 400);
+    }
+  });
+
+  function launchFireworks() {
+    const canvas = document.getElementById('celebration-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.style.display = 'block';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const COLORS = ['#6C63FF','#FF6584','#22d3a5','#fbbf24','#a78bfa','#f472b6','#34d399','#60a5fa'];
+
+    function burst(x, y) {
+      for (let i = 0; i < 80; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 3 + Math.random() * 5;
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          alpha: 1,
+          radius: 2 + Math.random() * 2,
+          gravity: 0.1 + Math.random() * 0.08,
+          drag: 0.97
+        });
+      }
+    }
+
+    const pts = [
+      [0.2, 0.3],[0.8, 0.25],[0.5, 0.18],
+      [0.15, 0.6],[0.85, 0.55],[0.5, 0.45]
+    ];
+
+    let b = 0;
+    const t = setInterval(function() {
+      if (b < pts.length) {
+        burst(pts[b][0] * canvas.width, pts[b][1] * canvas.height);
+        b++;
+      } else {
+        clearInterval(t);
+      }
+    }, 220);
+
+    const emojis = ['🎉','🎊','🏆','⭐','🥳','💯','🎓','✨'];
+    for (let i = 0; i < 16; i++) {
+      setTimeout(function() {
+        spawnEmoji(emojis[Math.floor(Math.random() * emojis.length)]);
+      }, i * 130);
+    }
+
+    let raf;
+    function animate() {
+      ctx.fillStyle = 'rgba(13,15,26,0.18)';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.vx *= p.drag;
+        p.vy *= p.drag;
+        p.alpha -= 0.014;
+
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = 1;
+
+      if (particles.length) {
+        raf = requestAnimationFrame(animate);
+      } else {
+        canvas.style.display = 'none';
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+      }
+    }
+
+    animate();
+
+    setTimeout(function() {
+      if (raf) cancelAnimationFrame(raf);
+      canvas.style.display = 'none';
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    }, 5000);
+  }
+
+  function launchEncouragement() {
+    const emojis = ['😊','💪','🚀','📚','⭐','🌟','🎯','👍','🔥','✊'];
+    for (let i = 0; i < 18; i++) {
+      setTimeout(function() {
+        spawnEmoji(emojis[Math.floor(Math.random() * emojis.length)]);
+      }, i * 90);
+    }
+
+    const msgs = ['Keep Going! 💪','You Got This! 🚀','Stay Strong! ⭐','Almost There! 🎯'];
+    const el = document.createElement('div');
+    el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    el.style.cssText =
+      "position:fixed;left:50%;top:58%;transform:translateX(-50%);" +
+      "font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;" +
+      "color:#fbbf24;text-shadow:0 0 20px rgba(251,191,36,.6);" +
+      "pointer-events:none;z-index:10001;animation:floatUp 2.4s ease-out forwards;";
+    document.body.appendChild(el);
+    setTimeout(function() { el.remove(); }, 2600);
+  }
+
+  function spawnEmoji(char) {
+    const el = document.createElement('div');
+    el.className = 'emoji-float';
+    el.textContent = char;
+    el.style.left = Math.random() * 90 + 'vw';
+    el.style.top = (45 + Math.random() * 40) + 'vh';
+    document.body.appendChild(el);
+    setTimeout(function() { el.remove(); }, 2400);
+  }
+</script>
+
+</body>
+</html>
